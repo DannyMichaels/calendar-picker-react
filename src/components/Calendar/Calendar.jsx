@@ -22,6 +22,7 @@ export default function Calendar() {
         currentMonth={currentMonth}
       />
       <CalendarDays currentMonth={currentMonth} />
+
       <CalendarCells
         currentMonth={currentMonth}
         selectedDate={selectedDate}
@@ -73,11 +74,14 @@ function CalendarCells({ currentMonth, selectedDate, setSelectedDate }) {
     [currentMonth]
   );
   const monthEnd = useMemo(() => dateFns.endOfMonth(monthStart), [monthStart]);
+
+  // startDate: the first cell we can see at the body
   const startDate = useMemo(
     () => dateFns.startOfWeek(monthStart),
     [monthStart]
   );
-  const endDate = useMemo(() => dateFns.endOfWeek(monthEnd), [monthEnd]);
+
+  const endDate = useMemo(() => dateFns.endOfWeek(monthEnd), [monthEnd]); // the last cell we can see at the body
 
   const dateFormat = 'd';
 
@@ -87,16 +91,17 @@ function CalendarCells({ currentMonth, selectedDate, setSelectedDate }) {
 
   const renderCells = () => {
     const rows = [];
-    let days = [];
+    let currentRowOfDays = [];
     let day = startDate;
     let dayNumber = '';
 
     while (day <= endDate) {
+      // creating one row of 7 days
       for (let i = 0; i < 7; i++) {
         dayNumber = dateFns.format(day, dateFormat);
 
         const cloneDay = day;
-        days.push(
+        currentRowOfDays.push(
           <div
             className={`col cell ${
               !dateFns.isSameMonth(day, monthStart)
@@ -106,6 +111,7 @@ function CalendarCells({ currentMonth, selectedDate, setSelectedDate }) {
                 : ''
             }`}
             key={day}
+            value={day}
             onClick={() =>
               onDateClick(dateFns.parseISO(new Date(cloneDay).toISOString()))
             }>
@@ -116,12 +122,14 @@ function CalendarCells({ currentMonth, selectedDate, setSelectedDate }) {
         );
         day = dateFns.addDays(day, 1);
       }
+
+      // pushing it to the rows
       rows.push(
         <div className="row" key={day}>
-          {days}
+          {currentRowOfDays}
         </div>
       );
-      days = [];
+      currentRowOfDays = [];
     }
 
     return <div className="body">{rows}</div>;
